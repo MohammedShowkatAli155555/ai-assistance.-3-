@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Student Innovation Assistant</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f4f7fb;
+      color: #1f2937;
+    }
+
+    header {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    button {
+      border: none;
+      padding: 13px 22px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      margin: 5px;
+    }
+
+    .generate {
+      background: #4f46e5;
+      color: white;
+    }
+
+    .generate:hover {
+      background: #4338ca;
+    }
+
+    .voice {
+      background: #111827;
+      color: white;
+    }
+
+    .output {
+      white-space: pre-wrap;
+      line-height: 1.7;
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 20px;
+      min-height: 200px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .loading {
+      display: none;
+      margin: 15px 0;
+      font-weight: bold;
+      color: #4f46e5;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 25px;
+      color: #6b7280;
+    }
+
+    @media(max-width:600px) {
+      header h1 {
+        font-size: 25px;
+      }
+
+      .container {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>🤖 AI Student Innovation Assistant</h1>
+  <p>Generate project ideas, objectives, PPT content and viva questions using real AI</p>
+</header>
+
+<div class="container">
+
+  <div class="card">
+
+    <label>What do you want help with?</label>
+
+    <select id="task">
+      <option value="project_ideas">Project Ideas</option>
+      <option value="problem_statement">Problem Statement</option>
+      <option value="objectives">Project Objectives</option>
+      <option value="tech_stack">Technology Stack</option>
+      <option value="ppt">PPT Points</option>
+      <option value="viva">Viva Questions</option>
+      <option value="complete_project">Complete Project Guidance</option>
+    </select>
+
+    <label>Project / Topic</label>
+
+    <input
+      id="topic"
+      type="text"
+      placeholder="Example: AI Health Monitoring System"
+    >
+
+    <label>Additional Requirements</label>
+
+    <textarea
+      id="requirements"
+      placeholder="Example: Beginner-friendly, Python, HTML, suitable for college project..."
+    ></textarea>
+
+    <label>Language</label>
+
+    <select id="language">
+      <option>English</option>
+      <option>Hindi</option>
+      <option>Telugu</option>
+      <option>Urdu</option>
+    </select>
+
+    <button class="generate" onclick="generateAI()">
+      ✨ Generate with AI
+    </button>
+
+    <button class="voice" onclick="startVoice()">
+      🎤 Voice Input
+    </button>
+
+    <button class="voice" onclick="speakResult()">
+      🔊 Read Result
+    </button>
+
+    <div class="loading" id="loading">
+      🤖 AI is generating your response...
+    </div>
+
+    <div class="status" id="status"></div>
+
+  </div>
+
+  <div class="card">
+
+    <h2>AI Response</h2>
+
+    <br>
+
+    <div id="output" class="output">
+      Your real AI-generated response will appear here.
+    </div>
+
+  </div>
+
+</div>
+
+<div class="footer">
+  AI Student Innovation Assistant © 2026
+</div>
+
+
+<script>
+
+async function generateAI() {
+
+  const task = document.getElementById("task").value;
+  const topic = document.getElementById("topic").value.trim();
+  const requirements =
+    document.getElementById("requirements").value.trim();
+  const language =
+    document.getElementById("language").value;
+
+  const output = document.getElementById("output");
+  const loading = document.getElementById("loading");
+  const status = document.getElementById("status");
+
+  if (!topic) {
+    alert("Please enter a project or topic.");
+    return;
+  }
+
+  output.textContent = "";
+  loading.style.display = "block";
+  status.textContent = "";
+
+  try {
+
+    const response = await fetch("/api/generate", {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        task,
+        topic,
+        requirements,
+        language
+      })
+
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Server error");
+    }
+
+    output.textContent = data.result;
+
+    status.textContent = "✅ Real AI response generated successfully.";
+
+  } catch (error) {
+
+    console.error(error);
+
+    output.textContent =
+      "Error: " + error.message;
+
+    status.textContent =
+      "❌ AI request failed.";
+
+  } finally {
+
+    loading.style.display = "none";
+
+  }
+}
+
+
+// Voice input
+function startVoice() {
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Voice recognition is not supported in this browser.");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = "en-IN";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = function() {
+    document.getElementById("status").textContent =
+      "🎤 Listening...";
+  };
+
+  recognition.onresult = function(event) {
+
+    const text =
+      event.results[0][0].transcript;
+
+    document.getElementById("topic").value = text;
+
+    document.getElementById("status").textContent =
+      "✅ Voice input received.";
+
+  };
+
+  recognition.onerror = function(event) {
+
+    document.getElementById("status").textContent =
+      "❌ Voice error: " + event.error;
+
+  };
+
+  recognition.start();
+}
+
+
+// Text-to-speech
+function speakResult() {
+
+  const text =
+    document.getElementById("output").textContent;
+
+  if (!text) {
+    alert("There is no AI response to read.");
+    return;
+  }
+
+  const speech =
+    new SpeechSynthesisUtterance(text);
+
+  speech.lang = "en-IN";
+  speech.rate = 0.9;
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(speech);
+}
+
+</script>
+
+</body>
+</html>
